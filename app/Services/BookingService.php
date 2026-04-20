@@ -79,7 +79,7 @@ class BookingService
                 ]);
             }
 
-            return $booking;            return $booking;
+            return $booking;
         });
     }
 
