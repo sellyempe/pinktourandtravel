@@ -1,94 +1,131 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Edit Destinasi - PinkTravel Admin</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=poppins:300,400,500,600,700" rel="stylesheet" />
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        <style></style>
-    @endif
-</head>
-<body class="font-poppins bg-gray-50 text-gray-900">
-    <!-- Navbar -->
-    <nav class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <a href="/" class="text-2xl font-bold text-gray-900">
-                    ✈️ PinkTravel Admin
-                </a>
-            </div>
-        </div>
+<x-admin-layout title="Edit Destinasi" active="destinations">
+
+    <nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <a href="{{ route('admin.destinations.dashboard') }}" class="hover:text-white transition">Destinasi</a>
+        <span>/</span>
+        <span class="text-gray-300">Edit: {{ Str::limit($destination->name, 40) }}</span>
     </nav>
 
-    <div class="pt-20">
-        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-6">
-                <a href="{{ route('admin.destinations.dashboard') }}" class="text-teal-600 hover:text-teal-800 font-medium">
-                    ← Kembali ke Destinasi
+    <form method="POST" action="{{ route('admin.destinations.update', $destination->id) }}" enctype="multipart/form-data">
+        @csrf @method('PUT')
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+            {{-- Kiri --}}
+            <div class="xl:col-span-2 space-y-5">
+                <div class="bg-gray-900 border border-white/5 rounded-2xl p-6">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-5">Informasi Destinasi</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5">Nama Destinasi <span class="text-pink-500">*</span></label>
+                            <input type="text" name="name" value="{{ old('name', $destination->name) }}"
+                                   class="w-full px-4 py-3 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500 transition" required>
+                            @error('name')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5">Lokasi <span class="text-pink-500">*</span></label>
+                            <input type="text" name="location" value="{{ old('location', $destination->location) }}"
+                                   class="w-full px-4 py-3 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500 transition" required>
+                            @error('location')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5">Kategori <span class="text-pink-500">*</span></label>
+                            <input type="text" name="category" value="{{ old('category', $destination->category) }}"
+                                   class="w-full px-4 py-3 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500 transition" required>
+                            @error('category')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5">Fakta Menarik <span class="text-pink-500">*</span></label>
+                            <textarea name="interesting_fact" rows="3"
+                                      class="w-full px-4 py-3 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500 transition resize-none" required>{{ old('interesting_fact', $destination->interesting_fact) }}</textarea>
+                            @error('interesting_fact')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5">Deskripsi <span class="text-pink-500">*</span></label>
+                            <textarea name="description" rows="6"
+                                      class="w-full px-4 py-3 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500 transition resize-none" required>{{ old('description', $destination->description) }}</textarea>
+                            @error('description')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Kanan --}}
+            <div class="space-y-5">
+
+                {{-- Foto --}}
+                <div class="bg-gray-900 border border-white/5 rounded-2xl p-6">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Foto Destinasi</h3>
+                    <div class="relative rounded-xl overflow-hidden bg-gray-800 cursor-pointer group h-48"
+                         onclick="document.getElementById('imageInput').click()">
+                        @if($destination->image)
+                            <img id="imagePreview" src="{{ $destination->image }}" alt="{{ $destination->name }}"
+                                 class="w-full h-full object-cover">
+                        @else
+                            <div id="imagePreview" class="w-full h-full flex flex-col items-center justify-center">
+                                <span class="text-5xl mb-2">📍</span>
+                                <p class="text-gray-600 text-sm">Belum ada foto</p>
+                            </div>
+                        @endif
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                            <p class="text-white text-sm font-medium">🖼 Ganti Foto</p>
+                        </div>
+                    </div>
+                    <input type="file" id="imageInput" name="image" accept="image/*" class="hidden" onchange="previewImage(this)">
+                    <p class="text-xs text-gray-600 mt-2 text-center">Biarkan kosong untuk mempertahankan foto lama</p>
+                    @error('image')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Status --}}
+                <div class="bg-gray-900 border border-white/5 rounded-2xl p-6">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Publikasi</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-3 rounded-xl border border-white/10 cursor-pointer has-[:checked]:border-emerald-500/50 has-[:checked]:bg-emerald-500/5 transition">
+                            <input type="radio" name="status" value="active" {{ old('status', $destination->status) === 'active' ? 'checked' : '' }} class="accent-emerald-500">
+                            <div>
+                                <p class="text-sm font-medium text-white">Aktif</p>
+                                <p class="text-xs text-gray-500">Tampil di website</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-xl border border-white/10 cursor-pointer has-[:checked]:border-gray-500/50 has-[:checked]:bg-gray-500/5 transition">
+                            <input type="radio" name="status" value="inactive" {{ old('status', $destination->status) === 'inactive' ? 'checked' : '' }} class="accent-gray-500">
+                            <div>
+                                <p class="text-sm font-medium text-white">Nonaktif</p>
+                                <p class="text-xs text-gray-500">Disembunyikan</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-pink-600 hover:bg-pink-500 text-white font-semibold rounded-xl transition shadow-lg shadow-pink-600/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Simpan Perubahan
+                </button>
+                <a href="{{ route('admin.destinations.dashboard') }}"
+                   class="block w-full text-center px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-medium rounded-xl transition">
+                    Batal
                 </a>
             </div>
-
-            <div class="bg-white rounded-lg shadow p-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-6">Edit Destinasi</h1>
-
-                <form method="POST" action="{{ route('admin.destinations.update', $destination->id) }}">
-                    @csrf
-                    @method('PUT')
-
-                    <!-- Name -->
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-semibold mb-2">Nama Destinasi</label>
-                        <input type="text" name="name" value="{{ old('name', $destination->name) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600" required>
-                        @error('name')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
-                    </div>
-
-                    <!-- Location -->
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-semibold mb-2">Lokasi</label>
-                        <input type="text" name="location" value="{{ old('location', $destination->location) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600" required>
-                        @error('location')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-semibold mb-2">Deskripsi</label>
-                        <textarea name="description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600" required>{{ old('description', $destination->description) }}</textarea>
-                        @error('description')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
-                    </div>
-
-                    <!-- Image URL -->
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-semibold mb-2">Image URL</label>
-                        <input type="url" name="image" value="{{ old('image', $destination->image) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600" required>
-                        @error('image')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
-                    </div>
-
-                    <!-- Status -->
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-semibold mb-2">Status</label>
-                        <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600" required>
-                            <option value="active" {{ old('status', $destination->status) === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ old('status', $destination->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                        @error('status')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
-                    </div>
-
-                    <!-- Submit -->
-                    <div class="flex gap-4">
-                        <button type="submit" class="bg-teal-600 text-white px-8 py-3 rounded-lg hover:bg-teal-700 transition font-semibold">
-                            Update Destinasi
-                        </button>
-                        <a href="{{ route('admin.destinations.dashboard') }}" class="bg-gray-300 text-gray-900 px-8 py-3 rounded-lg hover:bg-gray-400 transition font-semibold">
-                            Batal
-                        </a>
-                    </div>
-                </form>
-            </div>
         </div>
-    </div>
-</body>
-</html>
+    </form>
+
+    <script>
+    function previewImage(input) {
+        if (!input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            const el = document.getElementById('imagePreview');
+            if (el.tagName === 'IMG') {
+                el.src = e.target.result;
+            } else {
+                el.outerHTML = `<img id="imagePreview" src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+    </script>
+
+</x-admin-layout>
