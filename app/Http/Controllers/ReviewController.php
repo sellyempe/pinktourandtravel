@@ -20,7 +20,9 @@ class ReviewController extends Controller
     // GET /api/reviews/{type}/{itemId} - Get reviews for specific item
     public function getByItem($type, $itemId)
     {
-        $reviews = Review::where('reviewable_type', $type)
+        $modelType = $type === 'destination' ? 'App\\Models\\Destination' : 'App\\Models\\Trip';
+
+        $reviews = Review::where('reviewable_type', $modelType)
             ->where('reviewable_id', $itemId)
             ->approved()
             ->with('user')
@@ -59,7 +61,7 @@ class ReviewController extends Controller
             'reviewable_id' => $validated['reviewable_id'],
             'rating' => $validated['rating'],
             'comment' => $validated['comment'],
-            'status' => 'pending',
+            'status' => 'approved',
         ]);
 
         return response()->json($review, 201);

@@ -17,6 +17,14 @@ class WishlistController extends Controller
         return response()->json($wishlists, 200);
     }
 
+    // GET /wishlist - Web UI for user's wishlists
+    public function webIndex()
+    {
+        $user = auth()->user();
+        $wishlists = $user->wishlists()->with('wishlistable')->latest()->get();
+        return view('wishlist.index', compact('wishlists'));
+    }
+
     // POST /api/wishlists - Add to wishlist
     public function store(Request $request)
     {
