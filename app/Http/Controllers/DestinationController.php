@@ -7,12 +7,20 @@ use Illuminate\Http\Request;
 
 class DestinationController extends Controller
 {
-    // Page Routes - untuk navigasi antar page di web.php
     
     public function show($id)
     {
         $destination = Destination::findOrFail($id);
-        return view('destination.detail', compact('destination'));
+        
+        $hasReviewed = false;
+        if (auth()->check()) {
+            $hasReviewed = \App\Models\Review::where('user_id', auth()->id())
+                ->where('reviewable_type', 'App\Models\Destination')
+                ->where('reviewable_id', $id)
+                ->exists();
+        }
+
+        return view('destination.detail', compact('destination', 'hasReviewed'));
     }
 
     // API Routes - untuk CRUD di api.php

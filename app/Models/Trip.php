@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Trip extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'title',
         'description',
@@ -18,6 +21,9 @@ class Trip extends Model
         'duration_days',
         'image',
         'status',
+        'kuota',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
@@ -60,4 +66,3 @@ class Trip extends Model
         return $this->hasMany(Booking::class);
     }
 }
-

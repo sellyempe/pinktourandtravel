@@ -11,7 +11,23 @@ class TripController extends Controller
     public function detail($id)
     {
         $trip = Trip::with(['itineraries', 'includes', 'excludes'])->findOrFail($id);
-        return view('trip.detail', ['trip' => $trip]);
+        
+        $canReview = false;
+        if (auth()->check()) {
+            $hasCompletedBooking = \App\Models\Booking::where('user_id', auth()->id())
+                ->where('trip_id', $id)
+                ->where('status', 'completed')
+                ->exists();
+                
+            $hasReviewed = \App\Models\Review::where('user_id', auth()->id())
+                ->where('reviewable_type', 'App\Models\Trip')
+                ->where('reviewable_id', $id)
+                ->exists();
+                
+            $canReview = $hasCompletedBooking && !$hasReviewed;
+        }
+
+        return view('trip.detail', ['trip' => $trip, 'canReview' => $canReview]);
     }
 
     // GET /api/trips - Ambil semua trips

@@ -13,7 +13,8 @@ class Destination extends Model
         'category',
         'category_id',
         'image',
-        'location'
+        'location',
+        'status',
     ];
 
     public function category()
