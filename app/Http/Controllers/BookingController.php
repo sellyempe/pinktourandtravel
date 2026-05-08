@@ -27,7 +27,8 @@ class BookingController extends Controller
     public function create($tripId)
     {
         $trip = Trip::findOrFail($tripId);
-        $availableSeats = $this->bookingService->getAvailableSeats($tripId);
+        // Di awal belum ada tanggal dipilih, jadi kita lempar kuota maksimal
+        $availableSeats = $trip->kuota;
 
         return view('booking.create', [
             'trip' => $trip,
@@ -43,7 +44,7 @@ class BookingController extends Controller
         $validated = $request->validate([
             'trip_id' => 'required|exists:trips,id',
             'participants' => 'required|integer|min:1',
-            'preferred_date' => 'nullable|date|after_or_equal:today',
+            'preferred_date' => 'required|date|after_or_equal:today',
             'phone' => 'required|string|min:10|max:15',
             'special_request' => 'nullable|string|max:500',
         ]);
@@ -58,9 +59,27 @@ class BookingController extends Controller
 
             return redirect()->route('booking.confirmation', $booking->id);
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withInput()->with('error', $e->getMessage());
         }
     }
+
+    /**
+     * Cek ketersediaan kursi via AJAX
+     */
+    public function checkAvailability(Request $request)
+    {
+        $request->validate([
+            'trip_id' => 'required|exists:trips,id',
+            'date' => 'required|date'
+        ]);
+
+        $availableSeats = $this->bookingService->getAvailableSeatsForDate($request->trip_id, $request->date);
+
+        return response()->json([
+            'available_seats' => $availableSeats
+        ]);
+    }
+
 
     /**
      * Show booking confirmation page
@@ -91,16 +110,20 @@ class BookingController extends Controller
     }
 
     /**
-     * Handle notifikasi dari Midtrans
+     * Handle notifikasi dari Midtrans.
+     * Verifikasi signature dilakukan pertama kali untuk mencegah notifikasi palsu.
      */
     public function handleNotification(Request $request)
     {
         $notification = $request->all();
 
         try {
-            $result = $this->midtransService->handleNotification($notification);
+            // Verifikasi signature key dari Midtrans sebelum memproses apapun
+            $this->midtransService->verifySignature($notification);
+
+            $result  = $this->midtransService->handleNotification($notification);
             $orderId = $result['order_id'];
-            $status = $result['status'];
+            $status  = $result['status'];
 
             // Cari booking berdasarkan order_id
             $booking = Booking::where('order_id', $orderId)->firstOrFail();
@@ -130,33 +153,65 @@ class BookingController extends Controller
     }
 
     /**
+     * Dashboard user — ringkasan booking dan statistik
+     */
+    public function userDashboard()
+    {
+        $user     = auth()->user();
+        $bookings = $user->bookings()->with('trip')->latest()->get();
+
+        $stats = [
+            'total'     => $bookings->count(),
+            'pending'   => $bookings->where('status', 'pending')->count(),
+            'confirmed' => $bookings->where('status', 'confirmed')->count(),
+            'completed' => $bookings->where('status', 'completed')->count(),
+            'cancelled' => $bookings->where('status', 'cancelled')->count(),
+        ];
+
+        $recentBookings = $bookings->take(5);
+
+        return view('user.dashboard', compact('user', 'stats', 'recentBookings'));
+    }
+
+    /**
      * Show booking detail
      */
     public function show($bookingId)
     {
         $booking = Booking::with(['trip', 'user', 'paymentTransaction'])->findOrFail($bookingId);
-        
+
         if (auth()->id() !== $booking->user_id) {
             abort(403, 'Unauthorized');
         }
 
-        return view('booking.show', ['booking' => $booking]);
+        $hasReviewed = \App\Models\Review::where('user_id', auth()->id())
+            ->where('reviewable_type', 'App\Models\Trip')
+            ->where('reviewable_id', $booking->trip_id)
+            ->exists();
+
+        return view('booking.show', ['booking' => $booking, 'hasReviewed' => $hasReviewed]);
     }
 
     /**
-     * Cancel booking
+     * Cancel booking.
+     * Hanya booking dengan status 'pending' atau 'confirmed' yang dapat dibatalkan.
      */
     public function cancel($bookingId)
     {
         $booking = Booking::findOrFail($bookingId);
-        
+
         if (auth()->id() !== $booking->user_id) {
             abort(403, 'Unauthorized');
         }
 
+        // Batasi pembatalan hanya untuk status pending/confirmed
+        if (! in_array($booking->status, ['pending', 'confirmed'])) {
+            return back()->with('error', 'Booking dengan status "' . $booking->status . '" tidak dapat dibatalkan.');
+        }
+
         try {
             $this->bookingService->cancelBooking($booking);
-            return back()->with('success', 'Booking dibatalkan.');
+            return back()->with('success', 'Booking berhasil dibatalkan.');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }

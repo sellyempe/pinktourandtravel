@@ -12,10 +12,10 @@
             <style></style>
         @endif
     </head>
-    <body class="font-poppins bg-white text-gray-900">
+    <body class="font-poppins bg-gray-50/50 text-gray-900">
         <!-- Navbar Component -->
-        <div class="pt-16">
-            <x-navbar></x-navbar>
+        <div>
+            <x-navbar :always-scrolled="true"></x-navbar>
 
             <!-- Main Content -->
             <section class="py-20 px-4 bg-gray-50 min-h-screen">

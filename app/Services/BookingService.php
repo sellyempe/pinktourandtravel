@@ -18,10 +18,16 @@ class BookingService
         return DB::transaction(function () use ($userId, $tripId, $participants, $additionalData) {
             $trip = Trip::lockForUpdate()->findOrFail($tripId);
 
-            // Validasi kuota
-            $availableSeats = $trip->kuota - $trip->booked;
+            // Validasi kuota per tanggal
+            $preferredDate = $additionalData['preferred_date'] ?? null;
+            if (!$preferredDate) {
+                throw new \Exception("Tanggal keberangkatan harus dipilih.");
+            }
+
+            $availableSeats = $this->getAvailableSeatsForDate($tripId, $preferredDate);
+            
             if ($participants > $availableSeats) {
-                throw new \Exception("Hanya tersisa {$availableSeats} kursi yang tersedia.");
+                throw new \Exception("Pada tanggal {$preferredDate}, hanya tersisa {$availableSeats} kursi.");
             }
 
             // Hitung total harga
@@ -101,11 +107,17 @@ class BookingService
     }
 
     /**
-     * Get available seats untuk trip
+     * Get available seats untuk trip per tanggal tertentu
      */
-    public function getAvailableSeats($tripId)
+    public function getAvailableSeatsForDate($tripId, $date)
     {
         $trip = Trip::findOrFail($tripId);
-        return $trip->kuota - $trip->booked;
+        
+        $bookedOnDate = Booking::where('trip_id', $tripId)
+            ->whereDate('preferred_date', $date)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->sum('participants');
+            
+        return max(0, $trip->kuota - $bookedOnDate);
     }
 }

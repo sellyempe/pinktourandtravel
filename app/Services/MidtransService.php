@@ -50,33 +50,60 @@ class MidtransService
     }
 
     /**
+     * Verifikasi signature key dari Midtrans.
+     * Format: SHA512(order_id + status_code + gross_amount + server_key).
+     *
+     * @param  array $notification  Raw payload dari Midtrans
+     * @throws \Exception           Jika signature tidak valid
+     */
+    public function verifySignature(array $notification): void
+    {
+        $orderId      = $notification['order_id'] ?? '';
+        $statusCode   = $notification['status_code'] ?? '';
+        $grossAmount  = $notification['gross_amount'] ?? '';
+        $signatureKey = $notification['signature_key'] ?? '';
+
+        $serverKey = config('midtrans.server_key');
+
+        $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+
+        // hash_equals mencegah timing attack saat membandingkan string
+        if (! hash_equals($expectedSignature, $signatureKey)) {
+            \Log::warning('Midtrans Webhook: Invalid signature key', [
+                'order_id' => $orderId,
+            ]);
+            throw new \Exception('Invalid signature key');
+        }
+    }
+
+    /**
      * Handle notifikasi dari Midtrans
      */
     public function handleNotification($notification)
     {
-        $orderId = $notification['order_id'];
+        $orderId           = $notification['order_id'];
         $transactionStatus = $notification['transaction_status'];
-        $paymentType = $notification['payment_type'] ?? null;
-        $fraudStatus = $notification['fraud_status'] ?? null;
+        $paymentType       = $notification['payment_type'] ?? null;
+        $fraudStatus       = $notification['fraud_status'] ?? null;
 
         \Log::info('Midtrans Notification', [
-            'order_id' => $orderId,
-            'status' => $transactionStatus,
+            'order_id'     => $orderId,
+            'status'       => $transactionStatus,
             'fraud_status' => $fraudStatus,
         ]);
 
-        // Mapping status dari Midtrans ke aplikasi
+        // Mapping status dari Midtrans ke status lokal aplikasi
         $status = $this->mapTransactionStatus($transactionStatus, $fraudStatus);
 
         return [
-            'order_id' => $orderId,
-            'status' => $status,
+            'order_id'     => $orderId,
+            'status'       => $status,
             'payment_type' => $paymentType,
         ];
     }
 
     /**
-     * Map Midtrans status ke status lokal
+     * Map Midtrans transaction status ke status lokal
      */
     private function mapTransactionStatus($transactionStatus, $fraudStatus)
     {
@@ -102,7 +129,7 @@ class MidtransService
     }
 
     /**
-     * Verify transaction ke Midtrans
+     * Verify status transaksi langsung ke Midtrans (server-side check)
      */
     public function verifyTransaction($orderId)
     {

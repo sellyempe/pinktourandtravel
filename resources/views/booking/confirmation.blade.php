@@ -12,33 +12,37 @@
             <style></style>
         @endif
     </head>
-    <body class="font-poppins bg-white text-gray-900">
+    <body class="font-poppins bg-gray-50/50 text-gray-900">
         <!-- Navbar Component -->
-        <div class="pt-16">
-            <x-navbar></x-navbar>
+        <div>
+            <x-navbar :always-scrolled="true"></x-navbar>
 
             <!-- Main Content -->
-            <section class="py-20 px-4 bg-gray-50 min-h-screen">
-                <div class="max-w-4xl mx-auto">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <section class="pt-32 pb-24 px-4 min-h-screen">
+                <div class="max-w-5xl mx-auto">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
                         <!-- Booking Details -->
                         <div class="lg:col-span-2">
-                            <div class="bg-white rounded-lg p-8 border border-gray-200 mb-8">
-                                <div class="flex items-center gap-3 mb-6">
-                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-sm mb-8 relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-64 h-64 bg-green-100/30 rounded-full blur-3xl -mt-20 -mr-20 pointer-events-none"></div>
+                                <div class="flex items-center gap-4 mb-8 relative z-10">
+                                    <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center shadow-sm">
+                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                         </svg>
                                     </div>
                                     <div>
-                                        <h1 class="text-2xl font-bold text-gray-900">Booking Berhasil Dibuat</h1>
-                                        <p class="text-gray-600">Silakan selesaikan pembayaran untuk mengkonfirmasi booking Anda</p>
+                                        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Booking <span class="text-green-600">Berhasil</span></h1>
+                                        <p class="text-gray-500 font-medium">Selesaikan pembayaran untuk mengkonfirmasi</p>
                                     </div>
                                 </div>
 
                                 <!-- Order Details -->
-                                <div class="bg-gray-50 rounded-lg p-6 mb-8">
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Detail Pesanan</h3>
+                                <div class="bg-gray-50 rounded-[1.5rem] p-6 mb-8 border border-gray-100 relative z-10">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-500 text-sm">📋</span>
+                                        Detail Pesanan
+                                    </h3>
                                     
                                     <div class="space-y-4">
                                         <div class="flex justify-between">
@@ -82,40 +86,55 @@
                                         </div>
                                         @endif
                                         
-                                        <div class="border-t border-gray-200 pt-4">
+                                        <div class="border-t border-gray-200 pt-5 mt-2">
                                             <div class="flex justify-between items-center">
-                                                <span class="text-lg font-semibold text-gray-900">Total Pembayaran</span>
-                                                <span class="text-3xl font-bold text-pink-600">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</span>
+                                                <span class="text-lg font-bold text-gray-900">Total Pembayaran</span>
+                                                <span class="text-3xl font-extrabold text-pink-600">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Booking Info -->
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                                    <h4 class="font-semibold text-blue-900 mb-3">ℹ️ Informasi Penting</h4>
-                                    <ul class="space-y-2 text-sm text-blue-900">
-                                        <li>• Pembayaran harus diselesaikan dalam waktu 24 jam</li>
-                                        <li>• Booking akan otomatis dibatalkan jika tidak ada pembayaran</li>
-                                        <li>• Konfirmasi booking akan dikirim ke email Anda setelah pembayaran berhasil</li>
-                                        <li>• Silakan hubungi customer service jika ada pertanyaan</li>
+                                <div class="bg-blue-50/50 border border-blue-100 rounded-[1.5rem] p-6 relative z-10">
+                                    <h4 class="font-bold text-blue-900 mb-4 flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-500 text-sm">ℹ️</span>
+                                        Informasi Penting
+                                    </h4>
+                                    <ul class="space-y-3 text-sm text-blue-800 font-medium">
+                                        <li class="flex gap-2">
+                                            <span class="text-blue-500 mt-0.5">•</span> 
+                                            <span>Pembayaran harus diselesaikan dalam waktu 24 jam</span>
+                                        </li>
+                                        <li class="flex gap-2">
+                                            <span class="text-blue-500 mt-0.5">•</span> 
+                                            <span>Booking akan otomatis dibatalkan jika tidak ada pembayaran</span>
+                                        </li>
+                                        <li class="flex gap-2">
+                                            <span class="text-blue-500 mt-0.5">•</span> 
+                                            <span>Konfirmasi booking akan dikirim ke email Anda setelah pembayaran berhasil</span>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
 
                             <!-- Guest Info -->
-                            <div class="bg-white rounded-lg p-8 border border-gray-200">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Data Pemesan</h3>
+                            <div class="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-64 h-64 bg-gray-100/50 rounded-full blur-3xl -mt-20 -mr-20 pointer-events-none"></div>
+                                <h3 class="text-2xl font-extrabold text-gray-900 mb-6 relative z-10 flex items-center gap-2">
+                                    <span class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center shadow-sm text-gray-500 text-lg">👤</span>
+                                    Data Pemesan
+                                </h3>
                                 
-                                <div class="space-y-3">
-                                    <div>
-                                        <p class="text-gray-600 text-sm">Nama</p>
-                                        <p class="font-semibold text-gray-900">{{ $booking->user->name }}</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                                    <div class="bg-gray-50 p-4 rounded-[1rem] border border-gray-100">
+                                        <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Nama Lengkap</p>
+                                        <p class="font-bold text-gray-900">{{ $booking->user->name }}</p>
                                     </div>
                                     
-                                    <div>
-                                        <p class="text-gray-600 text-sm">Email</p>
-                                        <p class="font-semibold text-gray-900">{{ $booking->user->email }}</p>
+                                    <div class="bg-gray-50 p-4 rounded-[1rem] border border-gray-100">
+                                        <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Alamat Email</p>
+                                        <p class="font-bold text-gray-900">{{ $booking->user->email }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -123,33 +142,37 @@
 
                         <!-- Payment Section -->
                         <div class="lg:col-span-1">
-                            <div class="bg-white rounded-lg p-6 border border-gray-200 sticky top-24">
-                                <h3 class="text-lg font-bold text-gray-900 mb-6">Lanjutkan Pembayaran</h3>
+                            <div class="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-xl shadow-gray-100/50 sticky top-28">
+                                <h3 class="text-2xl font-extrabold text-gray-900 mb-6 tracking-tight">Pembayaran</h3>
                                 
-                                <div class="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-6">
-                                    <p class="text-gray-600 text-sm mb-2">Total Pembayaran</p>
-                                    <p class="text-2xl font-bold text-pink-600">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
+                                <div class="bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 rounded-[1.5rem] p-6 mb-8 relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-pink-200/50 rounded-full blur-xl pointer-events-none"></div>
+                                    <p class="text-gray-600 text-sm font-bold mb-2 relative z-10">Total Tagihan</p>
+                                    <p class="text-3xl font-extrabold text-pink-600 relative z-10 drop-shadow-sm">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
                                 </div>
 
                                 <button 
                                     id="pay-button"
-                                    class="w-full bg-pink-600 text-white py-3 rounded-lg font-semibold hover:bg-pink-700 transition mb-3"
+                                    class="w-full flex items-center justify-center py-4 px-6 bg-pink-600 text-white rounded-2xl font-bold hover:bg-pink-500 transition-all shadow-lg shadow-pink-600/30 hover:-translate-y-1 gap-2 mb-4"
                                 >
                                     Bayar Sekarang
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                 </button>
 
                                 <a 
                                     href="{{ route('booking.index') }}" 
-                                    class="w-full block text-center py-3 border border-gray-300 rounded-lg font-semibold text-gray-900 hover:bg-gray-50 transition"
+                                    class="w-full flex items-center justify-center py-4 px-6 border-2 border-gray-200 rounded-2xl font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:border-gray-300 transition-all"
                                 >
-                                    Lihat Booking Saya
+                                    Lihat Semua Booking
                                 </a>
 
-                                <div class="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-                                    <p class="font-semibold text-gray-900 mb-2">Metode Pembayaran:</p>
-                                    <p>✓ Kartu Kredit</p>
-                                    <p>✓ Transfer Bank</p>
-                                    <p>✓ E-Wallet</p>
+                                <div class="mt-8">
+                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 text-center">Metode Pembayaran Tersedia</p>
+                                    <div class="flex justify-center gap-3 opacity-60">
+                                        <div class="w-12 h-8 bg-gray-100 rounded flex items-center justify-center text-xs font-bold border border-gray-200">CC</div>
+                                        <div class="w-12 h-8 bg-gray-100 rounded flex items-center justify-center text-xs font-bold border border-gray-200">VA</div>
+                                        <div class="w-12 h-8 bg-gray-100 rounded flex items-center justify-center text-xs font-bold border border-gray-200">QRIS</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
