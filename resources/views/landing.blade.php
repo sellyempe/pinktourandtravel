@@ -157,7 +157,7 @@
                         <!-- Left Content -->
                         <div class="reveal">
                             <span class="inline-flex items-center gap-2 px-4 py-2 bg-pink-50 border border-pink-100 text-pink-600 rounded-full text-sm font-bold mb-6 tracking-wide uppercase">
-                                ✨ Featured Destination
+                                 Featured Destination
                             </span>
                             <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight">
                                 Explore <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-400">Banda Neira</span><br>with Us

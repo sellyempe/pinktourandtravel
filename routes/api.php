@@ -10,58 +10,25 @@ use App\Http\Controllers\PaymentTransactionController;
 use App\Http\Controllers\SettingsController;
 
 Route::middleware('api')->group(function () {
-    // Destination CRUD API Routes
-    Route::prefix('destinations')->group(function () {
-        // GET /api/destinations - Ambil semua
-        Route::get('/', [DestinationController::class, 'index']);
 
-        // POST /api/destinations - Buat baru
-        Route::post('/', [DestinationController::class, 'store']);
+    Route::get('/destinations', [DestinationController::class, 'index']);
+    Route::get('/destinations/{id}', [DestinationController::class, 'getDetail']);
 
-        // GET /api/destinations/{id} - Ambil satu
-        Route::get('/{id}', [DestinationController::class, 'getDetail']);
+    Route::get('/trips', [TripController::class, 'index']);
+    Route::get('/trips/{id}', [TripController::class, 'show']);
 
-        // PUT /api/destinations/{id} - Update
-        Route::put('/{id}', [DestinationController::class, 'update']);
-
-        // DELETE /api/destinations/{id} - Hapus
-        Route::delete('/{id}', [DestinationController::class, 'destroy']);
-    });
-
-    // Trip CRUD API Routes
-    Route::prefix('trips')->group(function () {
-        // GET /api/trips - Ambil semua
-        Route::get('/', [TripController::class, 'index']);
-
-        // POST /api/trips - Buat baru
-        Route::post('/', [TripController::class, 'store']);
-
-        // GET /api/trips/{id} - Ambil satu dengan details
-        Route::get('/{id}', [TripController::class, 'show']);
-
-        // PUT /api/trips/{id} - Update
-        Route::put('/{id}', [TripController::class, 'update']);
-
-        // DELETE /api/trips/{id} - Hapus
-        Route::delete('/{id}', [TripController::class, 'destroy']);
-    });
-
-    // Public Settings Routes
     Route::prefix('settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index']);
         Route::get('/by-key/{key}', [SettingsController::class, 'getByKey']);
         Route::get('/by-category/{category}', [SettingsController::class, 'getByCategory']);
     });
 
-    // Public Review Routes
-    Route::prefix('reviews')->group(function () {
-        Route::get('/', [ReviewController::class, 'index']);
-        Route::get('/{type}/{itemId}', [ReviewController::class, 'getByItem']);
-    });
+    Route::get('/reviews', [ReviewController::class, 'index']);
+    Route::get('/reviews/{type}/{itemId}', [ReviewController::class, 'getByItem']);
 
-    // Protected Routes (require authentication)
-    Route::middleware('auth:sanctum')->group(function () {
-        // Wishlist Routes
+    Route::middleware(['web', 'auth'])->group(function () {
+
+        
         Route::prefix('wishlists')->group(function () {
             Route::get('/', [WishlistController::class, 'index']);
             Route::post('/', [WishlistController::class, 'store']);
@@ -70,28 +37,32 @@ Route::middleware('api')->group(function () {
             Route::get('/check/{type}/{itemId}', [WishlistController::class, 'check']);
         });
 
-        // Review Routes (protected)
-        Route::prefix('reviews')->group(function () {
-            Route::post('/', [ReviewController::class, 'store']);
-            Route::put('/{id}', [ReviewController::class, 'update']);
-            Route::delete('/{id}', [ReviewController::class, 'destroy']);
-        });
+        
+        Route::post('/reviews', [ReviewController::class, 'store']);
+        Route::put('/reviews/{id}', [ReviewController::class, 'update']);
+        Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
 
-        // Payment Routes
+    
         Route::prefix('payments')->group(function () {
             Route::get('/', [PaymentTransactionController::class, 'index']);
+            Route::get('/by-reference/{referenceId}', [PaymentTransactionController::class, 'getByReference']);
             Route::get('/{id}', [PaymentTransactionController::class, 'show']);
             Route::post('/', [PaymentTransactionController::class, 'store']);
             Route::put('/{id}', [PaymentTransactionController::class, 'update']);
-            Route::get('/by-reference/{referenceId}', [PaymentTransactionController::class, 'getByReference']);
         });
 
-        // Admin Settings Routes (admin only)
-        Route::prefix('settings')->group(function () {
-            Route::post('/', [SettingsController::class, 'store'])->middleware('admin');
-            Route::put('/{id}', [SettingsController::class, 'update'])->middleware('admin');
-            Route::delete('/{id}', [SettingsController::class, 'destroy'])->middleware('admin');
+        Route::middleware('admin')->group(function () {
+
+            Route::post('/destinations', [DestinationController::class, 'store']);
+            Route::put('/destinations/{id}', [DestinationController::class, 'update']);
+            Route::delete('/destinations/{id}', [DestinationController::class, 'destroy']);
+            Route::post('/trips', [TripController::class, 'store']);
+            Route::put('/trips/{id}', [TripController::class, 'update']);
+            Route::delete('/trips/{id}', [TripController::class, 'destroy']);
+
+            Route::post('/settings', [SettingsController::class, 'store']);
+            Route::put('/settings/{id}', [SettingsController::class, 'update']);
+            Route::delete('/settings/{id}', [SettingsController::class, 'destroy']);
         });
     });
 });
-

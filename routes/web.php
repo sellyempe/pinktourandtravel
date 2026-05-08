@@ -22,6 +22,7 @@ Route::get('/trip/{id}', [TripController::class, 'detail'])->name('trip.detail')
 
 // Booking Routes
 Route::middleware('auth')->prefix('booking')->group(function () {
+    Route::get('/check-availability', [BookingController::class, 'checkAvailability'])->name('booking.check_availability');
     Route::get('/create/{trip_id}', [BookingController::class, 'create'])->name('booking.create');
     Route::post('/store', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/{id}/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
@@ -30,7 +31,10 @@ Route::middleware('auth')->prefix('booking')->group(function () {
     Route::post('/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
 });
 
-// Midtrans Webhook - CSRF Exception
+// Wishlist Web Route
+Route::middleware('auth')->get('/wishlist', [App\Http\Controllers\WishlistController::class, 'webIndex'])->name('wishlist.index');
+
+// Midtrans Webhook - CSRF Exception (dikecualikan di VerifyCsrfToken.php)
 Route::post('/midtrans-webhook', [BookingController::class, 'handleNotification'])->name('midtrans.webhook');
 
 // Auth Routes
@@ -44,14 +48,16 @@ Route::post('/logout', [LogoutController::class, 'logout'])->name('logout')->mid
 
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    // Trips
+    // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+    // Trips
     Route::get('/trips/create', [AdminController::class, 'createTrip'])->name('admin.trips.create');
     Route::post('/trips', [AdminController::class, 'storeTrip'])->name('admin.trips.store');
     Route::get('/trips/{id}/edit', [AdminController::class, 'editTrip'])->name('admin.trips.edit');
     Route::put('/trips/{id}', [AdminController::class, 'updateTrip'])->name('admin.trips.update');
     Route::delete('/trips/{id}', [AdminController::class, 'destroyTrip'])->name('admin.trips.destroy');
-    
+
     // Destinations
     Route::get('/destinations', [AdminController::class, 'destinationsDashboard'])->name('admin.destinations.dashboard');
     Route::get('/destinations/create', [AdminController::class, 'createDestination'])->name('admin.destinations.create');
@@ -59,6 +65,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/destinations/{id}/edit', [AdminController::class, 'editDestination'])->name('admin.destinations.edit');
     Route::put('/destinations/{id}', [AdminController::class, 'updateDestination'])->name('admin.destinations.update');
     Route::delete('/destinations/{id}', [AdminController::class, 'destroyDestination'])->name('admin.destinations.destroy');
+
+    // Bookings (admin management)
+    Route::get('/bookings', [AdminController::class, 'bookingsDashboard'])->name('admin.bookings.dashboard');
+    Route::post('/bookings/{id}/complete', [AdminController::class, 'completeBooking'])->name('admin.bookings.complete');
 
     // Settings
     Route::get('/settings', [AdminController::class, 'settingsDashboard'])->name('admin.settings.dashboard');
@@ -73,8 +83,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
 // User Routes
 Route::middleware(['auth', 'user'])->prefix('user')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('landing');
-    })->name('user.dashboard');
+    Route::get('/dashboard', [BookingController::class, 'userDashboard'])->name('user.dashboard');
 });
-
